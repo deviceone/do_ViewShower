@@ -20,7 +20,7 @@
 
 @implementation do_ViewShower_UIView
 {
-    @private
+@private
     NSMutableDictionary* _pages;
 }
 #pragma mark - doIUIModuleView协议方法（必须）
@@ -176,6 +176,7 @@
             [self.layer addAnimation:animation forKey:animationType.lowercaseString];
         }
         [self addSubview:view];
+        self.clipsToBounds = YES;
         [self bringSubviewToFront:view];
         doInvokeResult* _invokeResult = [[doInvokeResult alloc]init:_model.UniqueKey];
         
