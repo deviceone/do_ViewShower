@@ -12,8 +12,8 @@
 #import "doUIModuleHelper.h"
 #import "doScriptEngineHelper.h"
 #import "doIScriptEngine.h"
-#import "doJsonNode.h"
-#import "doJsonValue.h"
+#import "doJsonHelper.h"
+
 #import "doIPage.h"
 #import "doUIContainer.h"
 #import "doISourceFS.h"
@@ -73,9 +73,9 @@
 #pragma mark - 同步异步方法的实现
 /*
  1.参数节点
- doJsonNode *_dictParas = [parms objectAtIndex:0];
+ NSDictionary *_dictParas = [parms objectAtIndex:0];
  在节点中，获取对应的参数
- NSString *title = [_dictParas GetOneText:@"title" :@"" ];
+ NSString *title = [doJsonHelper GetOneText: _dictParas :@"title" :@"" ];
  说明：第一个参数为对象名，第二为默认值
  
  2.脚本运行时的引擎
@@ -101,14 +101,14 @@
 //同步
 - (void)addViews:(NSArray *)parms
 {
-    doJsonNode *_dictParas = [parms objectAtIndex:0];
+    NSDictionary *_dictParas = [parms objectAtIndex:0];
     //构建_invokeResult的内容
     
-    NSArray * pages = [_dictParas GetOneNodeArray:@"data"];
+    NSArray * pages =[doJsonHelper GetOneArray:_dictParas :@"data"];
     for(int i = 0;i <pages.count;i++){
-        doJsonNode* page = pages[i];
-        NSString* pageID = [page GetOneText:@"id" :@""];
-        NSString* pagePath = [page GetOneText:@"path" :@""];
+        NSDictionary* page = pages[i];
+        NSString* pageID = [doJsonHelper GetOneText:page :@"id" :@""];
+        NSString* pagePath = [doJsonHelper GetOneText:page :@"path" :@""];
         [_pages setObject:pagePath forKey:pageID];
     }
     
@@ -116,9 +116,9 @@
 }
 - (void)removeView:(NSArray *)parms
 {
-    doJsonNode *_dictParas = [parms objectAtIndex:0];
+    NSDictionary *_dictParas = [parms objectAtIndex:0];
     //构建_invokeResult的内容
-    NSString* pageID = [_dictParas GetOneText : @"id" : @""];
+    NSString* pageID = [doJsonHelper GetOneText: _dictParas : @"id" : @""];
     id pageValue = _pages[pageID];
     if (pageValue!=nil) {
         if([pageValue isKindOfClass:[NSString class]])
@@ -135,11 +135,11 @@
 }
 - (void)showView:(NSArray *)parms
 {
-    doJsonNode *_dictParas = [parms objectAtIndex:0];
+    NSDictionary *_dictParas = [parms objectAtIndex:0];
     //构建_invokeResult的内容
-    NSString* pageID = [_dictParas GetOneText : @"id" : @""];
-    NSString* animationType = [_dictParas GetOneText : @"animationType" : @""];
-    int animationTime = [_dictParas GetOneInteger: @"animationTime" : 300];
+    NSString* pageID = [doJsonHelper GetOneText: _dictParas : @"id" : @""];
+    NSString* animationType = [doJsonHelper GetOneText: _dictParas : @"animationType" : @""];
+    int animationTime = [doJsonHelper GetOneInteger:_dictParas : @"animationTime" : 300];
     id pageValue = _pages[pageID];
     if (pageValue!=nil) {
         UIView* view = nil;
@@ -195,12 +195,12 @@
     //_model的属性进行修改，同时调用self的对应的属性方法，修改视图
     [doUIModuleHelper HandleViewProperChanged: self :_model : _changedValues ];
 }
-- (BOOL) InvokeSyncMethod: (NSString *) _methodName : (doJsonNode *)_dicParas :(id<doIScriptEngine>)_scriptEngine : (doInvokeResult *) _invokeResult
+- (BOOL) InvokeSyncMethod: (NSString *) _methodName : (NSDictionary *)_dicParas :(id<doIScriptEngine>)_scriptEngine : (doInvokeResult *) _invokeResult
 {
     //同步消息
     return [doScriptEngineHelper InvokeSyncSelector:self : _methodName :_dicParas :_scriptEngine :_invokeResult];
 }
-- (BOOL) InvokeAsyncMethod: (NSString *) _methodName : (doJsonNode *) _dicParas :(id<doIScriptEngine>) _scriptEngine : (NSString *) _callbackFuncName
+- (BOOL) InvokeAsyncMethod: (NSString *) _methodName : (NSDictionary *) _dicParas :(id<doIScriptEngine>) _scriptEngine : (NSString *) _callbackFuncName
 {
     //异步消息
     return [doScriptEngineHelper InvokeASyncSelector:self : _methodName :_dicParas :_scriptEngine: _callbackFuncName];
